@@ -47,31 +47,24 @@ int main(void)
     HAL_Init();
     gpio_init();
     can_init();
+    can_st_init();
 
     HAL_FDCAN_Start(&hfdcan1);
     HAL_FDCAN_ActivateNotification(&hfdcan1, 
                                     FDCAN_IT_RX_FIFO0_NEW_MESSAGE|
                                     FDCAN_IT_BUS_OFF|
                                     FDCAN_IT_ERROR_WARNING|
-                                    FDCAN_IT_ERROR_PASSIVE,
+                                    FDCAN_IT_ARB_PROTOCOL_ERROR |
+                                    FDCAN_IT_DATA_PROTOCOL_ERROR |
+                                    FDCAN_IT_ERROR_PASSIVE|
+                                    FDCAN_IT_ERROR_LOGGING_OVERFLOW,
                                     0);
-    
-    uint8_t can_data[3] = {0x03, 0x02, 0x01};
 
     while(1)
     {
-        if(can_send(can_data, FDCAN_DLC_BYTES_3))
-        {
-            indicate_light_toggle();
-            can_st.tx_done = 0;
-        }
-        else
-        {
-            //FIFO FULL, STATE BUSY
-            uint32_t error = HAL_FDCAN_GetError(&hfdcan1);
-            uint32_t state = HAL_FDCAN_GetState(&hfdcan1);
-        }
-        HAL_Delay(1000);
+        //can_echo_demo();
+        can_active_send_demo();
+        HAL_Delay(100);
     }
 }
 
